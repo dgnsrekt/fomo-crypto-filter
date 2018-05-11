@@ -14,8 +14,6 @@ class ExchangeInterface:
         self.id = self.exchange.id
         self._log.debug('Succesfully initialized.', exchange=self.id)
 
-        # self.ticker_data = self.pull_tickers()
-
     @classmethod
     def connect(cls,  exchange):
         return getattr(ccxt, exchange)({'enableRateLimit': True})
@@ -76,6 +74,8 @@ class BinanceDataFrameCreator:
             output_data[pair] = output_data[pair][columns].apply(pd.to_numeric, errors='coerce')
             output_data[pair].columns = ['volume', 'percent_change']
 
+        output_data.pop('USDT')  # dump USDT DATA Filter doesnt like it.
+
         return output_data
 
 
@@ -92,8 +92,9 @@ class BittrexDataFrameCreator:
         sorted_ticker_data = exchange.sort_tickers(unsorted_ticker_data)
 
         dataframe = pd.DataFrame(sorted_ticker_data)
+        # percent change  = old -  new / old * 100
         dataframe['percent_change'] = (
-            dataframe['Last'] - dataframe['PrevDay'])/dataframe['Last'] * 100
+            dataframe['PrevDay'] - dataframe['Last'])/dataframe['PrevDay'] * 100
 
         columns.append(index)
         columns.append('basecurrency')
@@ -113,6 +114,10 @@ class BittrexDataFrameCreator:
             output_data[pair].columns = ['volume', 'percent_change']
 
         return output_data
+
+
+# x = BittrexDataFrameCreator.prepare_dataframes()
+# print(x['BTC'].describe())
 
 
 class PoloniexDataFrameCreator:
