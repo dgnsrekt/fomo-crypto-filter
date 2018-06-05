@@ -78,8 +78,16 @@ class BinanceDataFrameCreator:
 
         return output_data
 
+# TODO: OUTPUT TICKERS AS CURRENCY-BASE
+
 
 class BittrexDataFrameCreator:
+
+    @classmethod
+    def fix_ticker(cls, ticker):
+        str_ = ticker
+        str_ = str_.split('-')
+        return f'{str_[1]}-{str_[0]}'
 
     @classmethod
     def prepare_dataframes(cls):
@@ -92,9 +100,11 @@ class BittrexDataFrameCreator:
         sorted_ticker_data = exchange.sort_tickers(unsorted_ticker_data)
 
         dataframe = pd.DataFrame(sorted_ticker_data)
-        # percent change  = old -  new / old * 100
+        # percent change  = new -  old / old * 100
         dataframe['percent_change'] = (
-            dataframe['PrevDay'] - dataframe['Last'])/dataframe['PrevDay'] * 100
+            dataframe['Last'] - dataframe['PrevDay']) / dataframe['PrevDay'] * 100
+
+        dataframe['MarketName'] = dataframe['MarketName'].apply(BittrexDataFrameCreator.fix_ticker)
 
         columns.append(index)
         columns.append('basecurrency')
@@ -116,8 +126,10 @@ class BittrexDataFrameCreator:
         return output_data
 
 
-# x = BittrexDataFrameCreator.prepare_dataframes()
-# print(x['BTC'].describe())
+# x = BittrexDataFrameCreator.prepare_dataframes()['BTC']
+# x['name'] = x.index
+# x['name'] = x['name'].apply(fix_ticker)
+# print(x)
 
 
 class PoloniexDataFrameCreator:
