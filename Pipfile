@@ -1,23 +1,18 @@
 [[source]]
-
 url = "https://pypi.python.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [dev-packages]
 
-
-
 [packages]
-
 ccxt = "*"
 structlog = "*"
 pandas = "*"
 luigi = "*"
 poloniex = "*"
-
+schedule = "*"
+pygame = "*"
 
 [requires]
-
 python_version = "3.6"

@@ -2,7 +2,7 @@ from exchange_base import BinanceDataFrameCreator, BittrexDataFrameCreator
 import pickle
 
 
-class Dirty_Dataframe:
+class DataFrameFilter:
 
     def __init__(self, dataframe, column):
         self.name = column
@@ -28,11 +28,11 @@ from time import sleep
 def _filter(*, _dataframe, filter_column, initial_weight, gain, target_min, target_max):
     dataframe = _dataframe
     weight = initial_weight
-    mean = dataframe[filter_column].abs().mean()
-    # mean = dataframe[filter_column].abs().median()
+    # mean = dataframe[filter_column].abs().mean()
+    mean = dataframe[filter_column].abs().median()
 
     threshold = mean * weight
-    filtered_data = Dirty_Dataframe(dataframe, filter_column)
+    filtered_data = DataFrameFilter(dataframe, filter_column)
 
     filtered_data.update_threshold(threshold)
     steps_taken = 0
@@ -50,7 +50,9 @@ def _filter(*, _dataframe, filter_column, initial_weight, gain, target_min, targ
             print(str(filtered_data))
             steps_taken += 1
             if steps_taken > 10000:
-                raise Exception('Volume Filter > 10000 steps')
+                print('Volume Filter > 10000 steps')
+                break
+                #raise Exception('Volume Filter > 10000 steps')
         else:
             print('max target hit')
             break
@@ -68,11 +70,13 @@ def _filter(*, _dataframe, filter_column, initial_weight, gain, target_min, targ
             print(str(filtered_data))
             steps_taken += 1
             if steps_taken > 10000:
-                raise Exception('Volume Filter > 10000 steps')
+                print('Volume Filter > 10000 steps')
+                break
+                #raise Exception('Volume Filter > 10000 steps')
 
-        elif weight <= 0:
-            print('weight is less than zero')
-            break
+            if threshold <= 0:
+                print('weight is less than zero')
+                break
         else:
             print('min target hit')
             break
@@ -122,7 +126,7 @@ with open('test.pickle', 'rb') as _file:
 for x in out_data:
     print(out_data[x])  # these settings wont work across btc, eth, usdt, cant loop
     sleep(2)
-    filter_best(8, out_data[x])  # these settings wont work across btc, eth, usdt, cant loop
+    filter_best(5, out_data[x])  # these settings wont work across btc, eth, usdt, cant loop
     print('binance', x)
     sleep(2)
 
@@ -142,6 +146,6 @@ print(bittrex['percent_change'].mean())
 print(bittrex.describe())
 
 for x in out_data:
-    filter_best(3, out_data[x])
+    filter_best(5, out_data[x])
     print('bittrex', x)
     sleep(5)

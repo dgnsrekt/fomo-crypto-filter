@@ -1,8 +1,8 @@
 from exchange_base import BinanceDataFrameCreator, BittrexDataFrameCreator
 import pickle
 
-in_data = BittrexDataFrameCreator.prepare_dataframes()
-# in_data = BinanceDataFrameCreator.prepare_dataframes()
+# in_data = BittrexDataFrameCreator.prepare_dataframes()
+in_data = BinanceDataFrameCreator.prepare_dataframes()
 with open('test.pickle', 'wb') as _file:
     pickle.dump(in_data, _file, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -53,7 +53,7 @@ def rvoFilter(dataframe, initial_weight, gain, target_min, target_max):
     # raw volume filter
     volume_data = dataframe
     weight = initial_weight
-    mean = volume_data.volume.mean()
+    mean = volume_data.volume.abs().mean()
 
     threshold = mean * weight
     volume_obj = Volume_Dataframe(volume_data)
@@ -105,7 +105,7 @@ def rpcFilter(dataframe, initial_weight, gain, target_min, target_max):
     # raw volume filter
     price_data = dataframe
     weight = initial_weight
-    mean = price_data.percent_change.mean()
+    mean = price_data.percent_change.abs().mean()
 
     threshold = mean * weight
     price_obj = Price_Dataframe(price_data)
@@ -121,7 +121,7 @@ def rpcFilter(dataframe, initial_weight, gain, target_min, target_max):
             print('increasing threshold')
             print(f'weight: {weight}')
             print(f'threshold: {threshold}')
-            weight -= gain
+            weight += gain
             threshold = mean * weight
             price_obj.update_threshold(threshold)
             print(price_obj)
@@ -137,7 +137,7 @@ def rpcFilter(dataframe, initial_weight, gain, target_min, target_max):
             print('less than min target')
             print('decreasing threshold')
             print(f'weight: {weight}')
-            weight += gain
+            weight -= gain
             threshold = mean * weight
             price_obj.update_threshold(threshold)
             print(price_obj)
@@ -161,9 +161,13 @@ def get_ish(target):
         x = set(x.index)
         y = set(y.index)
 
-        if len(x.intersection(y)) > (target - 1):
-            print(x.intersection(y))
-            print(len(x.intersection(y)))
+        # if len(x.intersection(y)) > (target - 1):
+        # print(x.intersection(y))
+        # print(len(x.intersection(y)))
+        # break
+        if x:
+            print(x)
+            print(y)
             break
     else:
         print('nothing found')
